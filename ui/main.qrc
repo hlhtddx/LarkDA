@@ -1,0 +1,27 @@
+<RCC>
+  <qresource prefix="toolbar">
+    <file>icon/antivirus.png</file>
+    <file>icon/at.png</file>
+    <file>icon/bamboo.PNG</file>
+    <file>icon/bird.png</file>
+    <file>icon/bitcomet.PNG</file>
+    <file>icon/cubes.png</file>
+    <file>icon/donkey.png</file>
+    <file>icon/filrewall.png</file>
+    <file>icon/lock.png</file>
+    <file>icon/magnifier.png</file>
+    <file>icon/mule.png</file>
+    <file>icon/mule2.png</file>
+    <file>icon/no_se.png</file>
+    <file>icon/shark.png</file>
+    <file>icon/shield.png</file>
+    <file>icon/shield2.png</file>
+    <file>icon/spy.png</file>
+    <file>icon/taiji.png</file>
+    <file>icon/virus.png</file>
+    <file>icon/virus2.png</file>
+    <file>icon/virusscan.png</file>
+    <file>icon/wall.png</file>
+    <file>icon/wow.PNG</file>
+  </qresource>
+</RCC>
