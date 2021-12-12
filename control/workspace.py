@@ -3,7 +3,7 @@ from pathlib import Path
 
 from sqlite_utils import Database
 
-from lark.drive_manager import DriveManager
+from lark.drive import DriveManager
 from utils import debug_level
 from utils.config import SqliteConfig
 from .common import FDA_PATH, global_config, InvalidWorkspaceException

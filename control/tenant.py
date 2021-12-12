@@ -6,7 +6,7 @@ from sqlite_utils import Database
 from lark.auth import Authentication
 from lark.config import DaStore as Store
 from utils import logger, debug_level
-from lark.drive_manager import DriveManager
+from lark.drive import DriveManager
 
 
 class FileMap(object):

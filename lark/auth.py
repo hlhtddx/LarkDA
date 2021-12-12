@@ -46,7 +46,7 @@ class Authentication:
         return True
 
     def _launch_login_url(self) -> None:
-        redirect_uri = 'https://hlhtddx-us.ngrok.io/login_success'
+        redirect_uri = 'http://127.0.0.1:5555/login_success'
         param = urlencode({'redirect_uri': redirect_uri, 'app_id': self.tenant.app_id, 'state': self.tenant.name})
         login_uri = '''https://open.feishu.cn/open-apis/authen/v1/index?''' + param
         webbrowser.open_new_tab(login_uri)
