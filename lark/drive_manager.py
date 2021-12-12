@@ -2,6 +2,7 @@ from pathlib import Path
 
 from control.drive_model import FileMap, DocInFolder  # , FolderIdMap
 from utils import logger
+from .account import AccountMap
 from .file import BaseFile, Doc, Media, Folder, MySpace, SharedSpace, VirtualRoot
 
 
@@ -15,6 +16,7 @@ class DriveManager:
         self.path = workspace.path
         self.login = login
 
+        self.account_map = AccountMap(database=workspace.database)
         self.doc_in_file_map = DocInFolder(database=workspace.database)
         self.file_map = FileMap(drive=self, database=workspace.database)
 
@@ -29,6 +31,7 @@ class DriveManager:
         self._init_file_maps()
 
     def _init_file_maps(self):
+        self.account_map.load()
         self.file_map.load()
         self.doc_in_file_map.load()
 

@@ -1,3 +1,6 @@
+from larksuiteoapi.service.contact.v3.api import Service as ContactService
+from larksuiteoapi.service.contact.v3 import UserGetResult
+
 from larksuiteoapi.service.doc.v2 import DocCreateReqBody, DocMetaResult, DocCreateResult, DocContentResult
 from larksuiteoapi.service.doc.v2.api import Service as DocService
 from larksuiteoapi.service.drive.v1.api import Service as FileService
@@ -7,6 +10,12 @@ from larksuiteoapi.service.drive_explorer.v2 import FolderRootMetaResult, Folder
 from larksuiteoapi.service.drive_explorer.v2.api import Service as DriveExplorerService
 
 from lark.auth import lark_call, LarkCallArguments
+
+
+@lark_call(ContactService)
+def user_get(args, user_id, user_id_type) -> UserGetResult:
+    return args.service.users.get(user_access_token=args.user_access_token). \
+        set_user_id(user_id).set_user_id_type(user_id_type).do()
 
 
 @lark_call(DriveExplorerService)

@@ -1,4 +1,5 @@
 import shutil
+import traceback
 from pathlib import Path
 
 from control import Workspace
@@ -22,5 +23,6 @@ class Init(Command):
             workspace = Workspace(create=True)
         except AttributeError as e:
             print('Failed to create workspace.', e.args)
+            print(traceback.format_exc())
             return
         print('Done')

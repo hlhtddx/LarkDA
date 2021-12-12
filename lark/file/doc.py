@@ -3,7 +3,8 @@ from pathlib import Path
 
 from larksuiteoapi.service.doc.v2 import DocMetaResult
 
-from lark import doc_meta, doc_content, doc_create
+from lark import doc_meta, doc_content, doc_create, user_get
+from lark.account import Account
 from lark.file.media import Media
 from lark.file.base_file import BaseFile
 from lark.file.doc_parser import DocParser, Person, ImageItem, File, DocItem
@@ -135,10 +136,25 @@ class Doc(BaseFile):
             media_type = info['type']
             if media_type in ('Person',):
                 continue
+                # self._pull_person(info)
             if media_type == 'ImageItem':
                 self._pull_image(info)
             if media_type == 'File':
                 self._pull_attachment(info)
+
+    def _pull_person(self, info) -> bool:
+        open_id = info['open_id']
+        account = self.drive.account_map.get(open_id)
+        if not account:
+            user_info = user_get(self.drive.login.auth, open_id, 'open_id')
+            if not user_info:
+                return False
+            account = Account(open_id=open_id,
+                              user_id=user_info.user.user_id,
+                              name=user_info.user.name,
+                              en_name=user_info.user.en_name)
+            self.drive.account_map.add(account)
+        return True
 
     def _pull_image(self, info) -> bool:
         file_token = info['file_token']

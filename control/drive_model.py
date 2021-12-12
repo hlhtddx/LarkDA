@@ -189,6 +189,4 @@ class DocInFolder(object):
             doc_tokens = set()
             self.map[folder_token] = doc_tokens
         doc_tokens.add(doc_token)
-    #
-    # def _resolve_parent(self):
-    #     for
+
