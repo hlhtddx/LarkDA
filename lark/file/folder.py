@@ -107,6 +107,7 @@ class Folder(BaseFile):
                 child_folders.append(child)
             else:
                 child_files.append(child)
+        self.drive.doc_in_file_map.reset_folder(self, child_files)
         return True, child_folders, child_files
 
     def get_children(self):
@@ -136,6 +137,7 @@ class Folder(BaseFile):
     def make_child(self, name, token, file_type):
         file = self.drive.get_file(token)
         if file:
+            file.set(name=name)
             return file
 
         if file_type == 'folder':

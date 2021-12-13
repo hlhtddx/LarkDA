@@ -1,4 +1,3 @@
-import json
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -6,6 +5,8 @@ from .command import Command
 
 
 class Pull(Command):
+    INDENT_SPACE = '  '
+
     @classmethod
     def prepare_arg_parser(cls, sub_command_parser):
         parser: ArgumentParser = sub_command_parser.add_parser('pull')
@@ -36,6 +37,7 @@ class Pull(Command):
         self._pull_folder(target_rel_path, args)
 
     def _pull_folder(self, rel_path, args):
+
         file = self.drive.find_file_by_path(rel_path)
 
         if not file or file.doc_type != 'folder':
@@ -43,7 +45,9 @@ class Pull(Command):
             return
 
         # Begin to pull a folder
-        print('Pulling folder ', file)
+        print(self.INDENT_SPACE * args.indent_level, file)
+        args.indent_level += 1
+
         if args.sync:
             result, folders, docs = file.refresh_children()
         else:
@@ -67,10 +71,11 @@ class Pull(Command):
         for doc in docs:
             if args.sync:
                 doc.refresh()
-            print('Pulling doc ', doc)
+            print(self.INDENT_SPACE * args.indent_level, doc)
             doc.pull(args.media)
             doc.link_to(abs_path)
-            print('Pulling doc ', doc, ' done')
+            print(self.INDENT_SPACE * args.indent_level, ' done')
 
-        print('Pulling folder ', file, ' done')
-        # End to pull a folder
+        args.indent_level -= 1
+        print(self.INDENT_SPACE * args.indent_level, ' done')
+

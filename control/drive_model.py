@@ -147,9 +147,11 @@ class DocInFolder(object):
             self.database.conn.commit()
 
     def reset_folder(self, folder: Folder, docs: list[Doc]) -> bool:
-        self.map.pop(folder.token)
-        doc_tokens = set()
+        if folder.token in self.map:
+            self.map.pop(folder.token)
         self.table.delete_where('folder_token=?', [folder.token])
+
+        doc_tokens = set()
         rows = []
         for doc in docs:
             doc_tokens.add(doc.token)
