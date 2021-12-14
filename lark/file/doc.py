@@ -77,7 +77,7 @@ class Doc(BaseFile):
     def add_parent(self, parent, update_map=False):
         self._parents.append(parent)
         if update_map:
-            self.drive.doc_in_file_map.add(self, parent)
+            self.drive.doc_in_file_map.add_item(self, parent)
 
     @staticmethod
     def get_instance(drive, token, folder_token=None):

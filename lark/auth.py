@@ -118,7 +118,7 @@ def lark_call(service_factory, uses_user_token=True):
             largs.service = service_factory(largs.config)
 
             for retry_count in range(RETRY_TIMES):
-                if uses_user_token and not largs.user_access_token and not auth._login():
+                if uses_user_token and not largs.user_access_token and not auth.login():
                     auth.is_login = False
                     return None
 
