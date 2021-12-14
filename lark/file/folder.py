@@ -151,19 +151,6 @@ class Folder(BaseFile):
         self.drive.add_file(file)
         return file
 
-    def walk(self, parser=None, args=None):
-        self.travel(self, parser, args)
-
-    def travel(self, folder, parser, args):
-        result, folders, files = folder.refresh_children()
-        if not result:
-            logger.error('Failed to fetch children of folder(token=%s).', folder.token)
-            return
-        if parser is not None:
-            parser(folder, files, args)
-        for folder in folders:
-            self.travel(folder, parser, args)
-
     def local_child(self, name):
         return None
 

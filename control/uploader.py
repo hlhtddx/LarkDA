@@ -97,7 +97,7 @@ class Push:
         return self.token_map[token]
 
     def push(self):
-        authentication._login(self.tenant)
+        authentication.login(self.tenant)
         for doc in self.all_file.values():
             if doc['type'] != 'doc':
                 continue
