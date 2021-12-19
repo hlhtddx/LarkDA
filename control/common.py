@@ -24,6 +24,9 @@ class InvalidArgumentException(Exception):
     pass
 
 
+class NoLoginError(Exception):
+    pass
+
 
 class Tenant:
     __local_path: Path
@@ -42,7 +45,6 @@ class Tenant:
         return self.name == other.name
 
 
-# class GlobalConfig(JsonConfig):
 class GlobalConfig(SqliteConfig):
     PATH = Path.home() / FDA_PATH
     CONFIG_DB_PATH = PATH / 'config.db'
