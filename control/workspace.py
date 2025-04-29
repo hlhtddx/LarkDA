@@ -6,7 +6,7 @@ from sqlite_utils import Database
 from lark.drive import DriveManager
 from utils import debug_level
 from utils.config import SqliteConfig
-from .common import FDA_PATH, global_config, InvalidWorkspaceException
+from .common import FDA_PATH, global_config, InvalidWorkspaceException, NoLoginError
 from .login import Login
 
 
@@ -22,12 +22,10 @@ class Workspace:
         self.logger = self.init_logger(filename=self.log_path, level=debug_level)
         self.database = Database(self.db_path)
         self.config = SqliteConfig(database=self.database)
-        self._login = self.init_login()
-        if self.is_login:
-            self.drive = DriveManager(workspace=self, login=self._login)
-            self.drive.on_login_complete()
-        else:
-            self.drive = None
+        self.login = self.init_login()
+        self.drive = DriveManager(workspace=self, login=self.login)
+        self.target_logins = {}
+        self.target_drive = None
 
     @property
     def path(self) -> Path:
@@ -43,7 +41,7 @@ class Workspace:
 
     @property
     def doc_path(self) -> Path:
-        return self.config_path / 'doc'
+        return self.config_path / 'object'
 
     @property
     def log_path(self) -> Path:
@@ -53,7 +51,7 @@ class Workspace:
     @staticmethod
     def init_logger(filename, level):
         logger = logging.getLogger("FDA")
-        logger.setLevel(level=logging.DEBUG)
+        logger.setLevel(level=level)
         handler = logging.FileHandler(filename)
         handler.setLevel(level=logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -80,30 +78,30 @@ class Workspace:
         tenant = global_config.get_tenant(self.config.get('tenant'))
         if tenant:
             return Login(config=self.config, tenant=tenant)
-        return None
+        raise NoLoginError()
 
     def close(self):
         self.config = None
         self.database.conn.close()
 
-    def login(self, tenant, force):
-        if not self._login or tenant != self._login.tenant:
-            self._login = Login(self.config, tenant)
+    def login_to_tenant(self, tenant, force):
+        if not self.login or tenant != self.login.tenant:
+            self.login = Login(self.config, tenant)
             self.config.set('tenant', tenant.name)
 
-        if self._login.login(force):
+        if self.login.login(force):
             pass
             # self.drive.on_login_complete()
 
-    def logout(self):
-        if self._login.logout():
+    def logout_from_tenant(self, tenant):
+        if self.login.logout():
             self.config.set('tenant', '')
 
     @property
     def is_login(self):
-        if not self._login:
+        if not self.login:
             return False
-        return self._login.is_login
+        return self.login.is_login
 
     def find_file(self, path: Path) -> object or None:
         parent = self.find_file(path.parent)

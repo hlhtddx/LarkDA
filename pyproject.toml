@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "larkda"
+version = "0.1.0"
+description = ""
+authors = ["Frank Zhang <frankzhang123@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+flask = "^3.0.3"
+sqlite-utils = "^3.36"
+larksuite-oapi = "^1.0.34"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

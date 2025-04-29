@@ -1,4 +1,0 @@
-Flask~=2.0.2
-larksuite-oapi>=1.0.30
-sqlite-utils>=3.19
-attrs~=21.2.0

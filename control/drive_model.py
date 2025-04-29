@@ -4,32 +4,48 @@ from sqlite_utils.db import NotFoundError
 from lark.file import BaseFile, Folder, Doc, Media
 
 
-class FileMap(object):
-    table_name = f'file_map'
-
-    def __init__(self, drive, database: Database):
+class DriveDataModel(object):
+    def __init__(self, drive, database: Database, table_name: str):
         self.map = {}
-        self.id_map = {}
-        self.path_map = {}
         self.drive = drive
         self.database = database
-        self.table = self.database[self.table_name]
-        if self.table_name not in self.database.table_names():
-            self.table.create({
-                'token': str,
-                'name': str,
-                'doc_type': str,
-                'p_token': str,
-                'id': int,
-                'parent_id': int,
-                'create_time': int,
-                'edit_time': int,
-                'local_file': str,
-            }, pk='token', not_null=('token',))
-            self.table.create_index(columns=('p_token',), if_not_exists=True)
-            self.table.create_index(columns=('parent_id',), if_not_exists=True)
-            self.table.create_index(columns=('id',), if_not_exists=True)
-            self.database.conn.commit()
+        self.table_name = table_name
+        self.table = self.database[table_name]
+        if table_name not in self.database.table_names():
+            self._create_table()
+        self._create_index()
+        self.database.conn.commit()
+
+    def _create_table(self):
+        pass
+
+    def _create_index(self):
+        pass
+
+
+class FileMap(DriveDataModel):
+    def __init__(self, drive, database: Database):
+        super().__init__(drive=drive, database=database, table_name='file_map')
+        self.id_map = {}
+        self.path_map = {}
+
+    def _create_table(self):
+        self.table.create({
+            'token': str,
+            'name': str,
+            'doc_type': str,
+            'p_token': str,
+            'id': int,
+            'parent_id': int,
+            'create_time': int,
+            'edit_time': int,
+            'local_file': str,
+        }, pk='token', not_null=('token',))
+
+    def _create_index(self):
+        self.table.create_index(columns=('p_token',), if_not_exists=True)
+        self.table.create_index(columns=('parent_id',), if_not_exists=True)
+        self.table.create_index(columns=('id',), if_not_exists=True)
 
     def _save_file(self, file):
         # do not save builtin folders
@@ -50,7 +66,7 @@ class FileMap(object):
         self.database.conn.commit()
         return True
 
-    def load_file(self, file_data):
+    def _load_file(self, file_data):
         token = file_data['token']
         name = file_data['name']
         doc_type = file_data['doc_type']
@@ -75,15 +91,15 @@ class FileMap(object):
     def load(self) -> dict:
         sql_query = f'select * from {self.table_name} where doc_type = "folder";'
         for file_data in self.database.query(sql_query):
-            self.load_file(file_data=file_data)
+            self._load_file(file_data=file_data)
 
         sql_query = f'select * from {self.table_name} where doc_type = "doc";'
         for file_data in self.database.query(sql_query):
-            self.load_file(file_data=file_data)
+            self._load_file(file_data=file_data)
 
         sql_query = f'select * from {self.table_name} where doc_type <> "folder" and doc_type <> "doc";'
         for file_data in self.database.query(sql_query):
-            self.load_file(file_data=file_data)
+            self._load_file(file_data=file_data)
 
         self.resolve_parent()
         return self.map
@@ -132,19 +148,20 @@ class FileMap(object):
         return folders
 
 
-class DocInFolder(object):
-    def __init__(self, database: Database):
+class DocInFolder(DriveDataModel):
+    def __init__(self, drive, database: Database):
+        super().__init__(drive=drive, database=database, table_name='doc_in_folder_map')
         self.map = {}
         self.database = database
-        table_name = f'doc_in_folder_map'
-        self.table = self.database[table_name]
-        if table_name not in self.database.table_names():
-            self.table.create({
-                'doc_token': str,
-                'folder_token': str,
-            }, pk=('doc_token', 'folder_token'), not_null=('doc_token', 'folder_token'))
-            self.table.create_index(('folder_token',), if_not_exists=True)
-            self.database.conn.commit()
+
+    def _create_table(self):
+        self.table.create({
+            'doc_token': str,
+            'folder_token': str,
+        }, pk=('doc_token', 'folder_token'), not_null=('doc_token', 'folder_token'))
+
+    def _create_index(self):
+        self.table.create_index(('folder_token',), if_not_exists=True)
 
     def reset_folder(self, folder: Folder, docs: list[Doc]) -> bool:
         if folder.token in self.map:
@@ -169,9 +186,8 @@ class DocInFolder(object):
             folder_token = row['folder_token']
             doc_token = row['doc_token']
             self._add(doc_token, folder_token)
-        # self._resolve_parent()
 
-    def add(self, doc, folder):
+    def add_item(self, doc, folder):
         self.table.insert(
             {
                 'doc_token': doc.token,
@@ -192,3 +208,30 @@ class DocInFolder(object):
             self.map[folder_token] = doc_tokens
         doc_tokens.add(doc_token)
 
+
+class PushedFile(DriveDataModel):
+    def __init__(self, drive, database: Database, tenant: str):
+        super().__init__(drive, database, f'pushed_file.{tenant}')
+
+    def _create_table(self):
+        self.table.create({
+            'source_token': str,
+            'target_token': str,
+            'revision': str
+        }, pk='source_token', not_null=('source_token', 'target_token'))
+
+    def _create_index(self):
+        self.table.create_index(('source_token',), if_not_exists=True)
+
+    def load(self):
+        for row in self.table.rows:
+            source_token = row['source_token']
+            target_token = row['target_token']
+            revision = row['revision']
+            self.map[source_token] = (source_token, target_token, revision)
+
+    def add_item(self, file, revision=0):
+        self.database.conn.commit()
+
+    def get_item(self, token):
+        return self.map.get(token, None)

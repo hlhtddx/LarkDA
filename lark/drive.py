@@ -29,6 +29,7 @@ class DriveManager:
         self.add_file(self.my_space, save_to_db=False)
 
         self._init_file_maps()
+        self.on_login_complete()
 
     def _init_file_maps(self):
         self.account_map.load()
@@ -61,12 +62,6 @@ class DriveManager:
         doc_tokens = self.doc_in_file_map.get_folder(folder.token)
         docs = [self.file_map.get_item(token) for token in doc_tokens]
         return docs
-
-    def list_all_folders(self, rel_path):
-        def append_file_to_list(folder, files: set, file):
-            print(f'"{folder.path}" with and {len(files)} files. Token={folder.token}')
-
-        self.virtual_root.walk(append_file_to_list, None)
 
     # Lark Drive Low-level Operations
     def download(self, token: str, target_dir: str):

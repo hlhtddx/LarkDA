@@ -20,7 +20,7 @@ class Info(Command):
                 print(tenant)
 
         if args.all or args.login:
-            print(self.workspace._login)
+            print(self.workspace.login)
 
         if args.all or args.drive:
             print(self.workspace.drive)
